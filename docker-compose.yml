@@ -1,0 +1,60 @@
+# Local stack
+#   airflow  - scheduler + webserver (standalone)  http://localhost:8080
+#              (user "admin"; password: docker compose exec airflow cat standalone_admin_password.txt)
+#   mlflow   - experiment tracking & model registry UI  http://localhost:5000
+#   api      - FastAPI scoring service                  http://localhost:8000/docs
+#
+# All three share one volume holding the DuckDB warehouse, raw files and MLflow store, and
+# run as the airflow UID (50000) so every service can write to it.
+#
+#   docker compose up -d --build
+#   docker compose exec airflow airflow dags trigger news_backfill
+
+x-newspipe-env: &newspipe-env
+  NEWSPIPE_HOME: /opt/newspipe
+  MLFLOW_DISABLE_AGENT_HINT: "1"
+
+services:
+  airflow:
+    build:
+      context: .
+      dockerfile: docker/airflow.Dockerfile
+    command: standalone
+    environment:
+      <<: *newspipe-env
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
+      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "false"
+    volumes:
+      - ./dags:/opt/airflow/dags:ro
+      - newspipe-data:/opt/newspipe/data
+    ports:
+      - "8080:8080"
+
+  mlflow:
+    build:
+      context: .
+      dockerfile: docker/app.Dockerfile
+    user: "50000:0"
+    command: >
+      mlflow ui --host 0.0.0.0 --port 5000
+      --backend-store-uri sqlite:////opt/newspipe/data/mlflow.db
+    environment: *newspipe-env
+    volumes:
+      - newspipe-data:/opt/newspipe/data
+    ports:
+      - "5000:5000"
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/app.Dockerfile
+    user: "50000:0"
+    environment: *newspipe-env
+    volumes:
+      - newspipe-data:/opt/newspipe/data
+    ports:
+      - "${API_PORT:-8000}:8000"
+
+volumes:
+  newspipe-data:
