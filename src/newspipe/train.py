@@ -205,7 +205,7 @@ def log_to_mlflow(
             mlflow.log_artifacts(tmp, artifact_path="backtest")
 
         # Final model: the best servable candidate refit on all available history.
-        X = frame[SERVING_COLUMNS]
+        X = frame[SERVING_COLUMNS].astype({"n_headlines": "float64"})
         final = clone(best.estimator).fit(X, frame.target)
         sample = X.head(5)
         info = mlflow.sklearn.log_model(
@@ -214,6 +214,7 @@ def log_to_mlflow(
             signature=infer_signature(sample, final.predict_proba(sample)[:, 1]),
             input_example=sample,
             registered_model_name=cfg["registered_model"],
+            serialization_format="cloudpickle",
         )
         best_row = summary[summary.model == best.name].iloc[0]
         mlflow.log_metric("selected_balanced_accuracy", best_row.balanced_accuracy)
