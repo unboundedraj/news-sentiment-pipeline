@@ -37,6 +37,9 @@ NUMERIC_FEATURES = [
     "pos_mean",
 ]
 
+# Columns a served model receives (everything else in the training frame is label/context).
+SERVING_COLUMNS = ["doc_text", *NUMERIC_FEATURES]
+
 _analyzer: SentimentIntensityAnalyzer | None = None
 
 
@@ -114,8 +117,7 @@ def training_frame(con: duckdb.DuckDBPyConnection, target: str) -> pd.DataFrame:
         raise ValueError(f"unsupported target {target}")
     return con.execute(
         f"""
-        SELECT f.*, t.{target} AS target, t.next_day_return, t.same_day_return,
-               t.prev_day_up
+        SELECT f.*, t.{target} AS target, t.same_day_up, t.prev_day_up
         FROM gold.daily_features f
         JOIN gold.targets t USING (news_date)
         WHERE t.{target} IS NOT NULL
