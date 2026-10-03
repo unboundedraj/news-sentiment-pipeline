@@ -1,0 +1,23 @@
+{
+  "chart": {
+    "result": [
+      {
+        "meta": {"symbol": "^DJI", "gmtoffset": -14400},
+        "timestamp": [1467207000, 1467293400, 1467379800],
+        "indicators": {
+          "quote": [
+            {
+              "open": [17456.0, 17712.0, null],
+              "high": [17704.5, 17930.6, null],
+              "low": [17456.0, 17711.8, null],
+              "close": [17694.68, 17929.99, null],
+              "volume": [106380000, 133030000, null]
+            }
+          ],
+          "adjclose": [{"adjclose": [17694.68, 17929.99, null]}]
+        }
+      }
+    ],
+    "error": null
+  }
+}

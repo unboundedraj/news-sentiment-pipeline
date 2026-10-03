@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Test feed</title>
+    <item>
+      <title>Markets rally as inflation cools</title>
+      <link>https://example.com/a</link>
+      <guid>https://example.com/a</guid>
+      <pubDate>Thu, 01 Oct 2026 10:30:00 +0100</pubDate>
+    </item>
+    <item>
+      <title>Markets rally as inflation cools</title>
+      <link>https://example.com/a</link>
+      <guid>https://example.com/a</guid>
+      <pubDate>Thu, 01 Oct 2026 10:30:00 +0100</pubDate>
+    </item>
+    <item>
+      <title>Storm disrupts shipping in the Gulf</title>
+      <link>https://example.com/b</link>
+      <pubDate>Thu, 01 Oct 2026 11:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Headline with a broken date</title>
+      <link>https://example.com/c</link>
+      <pubDate>yesterday-ish</pubDate>
+    </item>
+    <item>
+      <title></title>
+      <link>https://example.com/d</link>
+    </item>
+  </channel>
+</rss>
