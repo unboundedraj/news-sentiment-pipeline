@@ -278,6 +278,8 @@ def write_report(s: Settings, target: str, summary: pd.DataFrame, folds: pd.Data
     lines.append("")
     path.write_text("\n".join(lines), encoding="utf-8", newline="\n")
     (reports / f"backtest_{target}.json").write_text(
-        json.dumps(summary.to_dict("records"), indent=2, default=float), encoding="utf-8"
+        json.dumps(summary.to_dict("records"), indent=2, default=float),
+        encoding="utf-8",
+        newline="\n",
     )
     return path
