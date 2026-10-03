@@ -46,8 +46,10 @@ class Settings:
 def load_settings(
     config: str | os.PathLike | None = None, home: str | os.PathLike | None = None
 ) -> Settings:
-    path = Path(config or os.environ.get("NEWSPIPE_CONFIG", DEFAULT_CONFIG))
+    root = Path(home or os.environ.get("NEWSPIPE_HOME", PACKAGE_ROOT))
+    # Lookup order: explicit arg, $NEWSPIPE_CONFIG, <home>/config, the source checkout.
+    candidates = [config, os.environ.get("NEWSPIPE_CONFIG"), root / "config" / "settings.yaml"]
+    path = next((Path(c) for c in candidates if c and Path(c).exists()), DEFAULT_CONFIG)
     with open(path, encoding="utf-8") as fh:
         raw = yaml.safe_load(fh)
-    root = Path(home or os.environ.get("NEWSPIPE_HOME", PACKAGE_ROOT))
     return Settings(raw=raw, home=root)
