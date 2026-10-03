@@ -1,0 +1,52 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install ruff
+      - run: ruff check src tests dags
+      - run: ruff format --check src tests dags
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - run: pip install -e ".[tracking,api,dev]"
+      - run: pytest
+
+  airflow-dags:
+    # DAG integrity: import every DAG in the real Airflow image and fail on any import error.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -f docker/airflow.Dockerfile -t newspipe-airflow .
+      - name: DagBag import check
+        run: |
+          docker run --rm -v "$PWD/dags:/opt/airflow/dags:ro" newspipe-airflow \
+            python -c "
+          from airflow.models import DagBag
+          bag = DagBag('/opt/airflow/dags', include_examples=False)
+          assert not bag.import_errors, bag.import_errors
+          expected = {'news_backfill', 'news_daily', 'model_retrain'}
+          assert expected <= set(bag.dag_ids), bag.dag_ids
+          for d in bag.dags.values():
+              assert d.default_args.get('retries', 0) >= 1, d.dag_id
+          print('DAGs OK:', sorted(bag.dag_ids))
+          "
