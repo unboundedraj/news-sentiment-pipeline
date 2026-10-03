@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# Data, warehouse, experiment tracking
+data/
+*.duckdb
+*.duckdb.wal
+mlruns/
+mlflow.db
+mlartifacts/
+
+# Airflow (docker volumes)
+airflow/logs/
+airflow/*.db
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,41 @@
+# Paths are relative to the repo root unless absolute. NEWSPIPE_HOME overrides the root.
+
+paths:
+  data: data
+  warehouse: data/warehouse.duckdb
+  raw: data/raw
+  mlflow_tracking_uri: sqlite:///data/mlflow.db
+  mlflow_artifacts: data/mlartifacts
+
+historical:
+  # Combined daily top-25 news headlines with an up/down label (2000-01-03 .. 2016-07-01).
+  url: https://raw.githubusercontent.com/tfkhushij/Stock-Sentiment-Analysis/main/Data.csv
+  sha256: null  # pinned in the landing manifest on first download
+  encoding: ISO-8859-1
+  # From this date the file switches source (UK newspaper headlines -> Reddit r/worldnews).
+  segment_boundary: "2008-08-08"
+
+market:
+  symbol: "^DJI"
+  provider: yahoo_chart
+  start: "1999-12-01"
+  # Overlap re-fetched on every incremental run so revised bars are picked up.
+  refetch_overlap_days: 5
+
+rss:
+  feeds:
+    bbc_world: https://feeds.bbci.co.uk/news/world/rss.xml
+    guardian_world: https://www.theguardian.com/world/rss
+    bbc_business: https://feeds.bbci.co.uk/news/business/rss.xml
+
+features:
+  version: v1
+  max_headlines_per_day: 25
+
+training:
+  # Walk-forward: train on every year before Y, test on Y.
+  first_test_year: 2004
+  target: next_day_up      # next_day_up (causal forecast) | same_day_up (nowcast)
+  random_seed: 42
+  experiment: news-sentiment-walkforward
+  registered_model: news-direction-classifier
